@@ -17,7 +17,7 @@ def get_data(path):
         os.path.join(DATA_PATH, path)
     )
 
-df, mesh = get_data("285002.078369/data.vtk")
+df, mesh = get_data("285140.078369/data.vtk")
 
 #should U_z be dropped? dim=3 does not drop U_z
 cleaned_data = kf.clean_data(df, dim=2, vars_to_drop=None)
@@ -26,11 +26,16 @@ variables = cleaned_data.columns
 
 print("Starting embedding")
 
-#UMAP
-figpath="figures/UMAP"
+#savepaths
+figpath="figures/UMAP_paramtest2"
+embedding_path = "data/embeddings/285140.078369"
 os.makedirs(figpath, exist_ok=True)
+os.makedirs(embedding_path, exist_ok=True)
 
-n_neighbors_range = [50, 100, 150, 200, 250, 300]
+saved_embeddings = os.listdir(embedding_path)
+
+#UMAP
+n_neighbors_range = [100, 150, 200, 250, 300]
 min_dist_range = [0.05, 0.1]
 
 for n_neighbors in n_neighbors_range:
@@ -40,19 +45,30 @@ for n_neighbors in n_neighbors_range:
 
         print(n_neighbors, min_dist)
 
-        embedding, mapper = kf.embed_data(
-            data=cleaned_data,
-            algorithm=UMAP,
-            scale=True,
-            n_neighbors=n_neighbors,
-            min_dist=min_dist,
-            #ensures reproducibility, disable for faster compute
-            # random_state=0,
-            #how many dimensions to reduce to
-            n_components=2
-        )
+        if f"{n_neighbors}_{min_dist}.npy" in saved_embeddings:
+            embedding = np.load(f"{n_neighbors}_{min_dist}.npy")
+            print("loaded from existing")
 
-        print("saving vars")
+        else:
+
+            embedding, mapper = kf.embed_data(
+                data=cleaned_data,
+                algorithm=UMAP,
+                scale=True,
+                n_neighbors=n_neighbors,
+                min_dist=min_dist,
+                #ensures reproducibility, disable for faster compute
+                # random_state=0,
+                #how many dimensions to reduce to
+                n_components=2
+            )
+
+            np.save(
+                os.path.join(embedding_path, f"{n_neighbors}_{min_dist}"),
+                embedding
+            )
+
+        print("creating plots")
 
         for var in variables:
 
