@@ -15,16 +15,14 @@ dirs = os.listdir(IN_DIR)
 length = len(dirs)
 
 for index, dirname in enumerate(dirs):
-    _, out = kf.import_vtk_data(os.path.join(IN_DIR, dirname, "U_zNormal.vtk"))
-    for filename in os.listdir(
-        os.path.join(IN_DIR, dirname)
-        ):
-        if not filename == "U_zNormal.vtk":
-            _, mesh = kf.import_vtk_data(
-                os.path.join(IN_DIR, dirname, filename)
-            )
-            for var_name in mesh.array_names:
-                out[var_name] = mesh.get_array(var_name)
+    filenames = os.listdir(os.path.join(IN_DIR, dirname))
+    _, out = kf.import_vtk_data(os.path.join(IN_DIR, dirname, filenames[0]))
+    for filename in filenames[1:]:
+        _, mesh = kf.import_vtk_data(
+            os.path.join(IN_DIR, dirname, filename)
+        )
+        for var_name in mesh.array_names:
+            out[var_name] = mesh.get_array(var_name)
     os.makedirs(
         os.path.join(OUT_DIR, dirname),
         exist_ok=True
@@ -32,4 +30,4 @@ for index, dirname in enumerate(dirs):
     out.save(
         os.path.join(OUT_DIR, dirname, "data.vtk")
     )
-    print(index/length)
+    print(f"{(index/length)*100:.2f}%")
