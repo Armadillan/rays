@@ -20,22 +20,23 @@ def get_data(path):
 df, mesh = get_data("285140.078369/data.vtk")
 
 #should U_z be dropped? dim=3 does not drop U_z
-cleaned_data = kf.clean_data(df, dim=2, vars_to_drop=None)
+cleaned_data = kf.clean_data(df, dim=2, vars_to_drop=["N2"])
 
 variables = cleaned_data.columns
+variables = ["U:0"]
 
 print("Starting embedding")
 
 #savepaths
-figpath="figures/UMAP_paramtest2"
-embedding_path = "data/embeddings/285140.078369"
+figpath="figures/UMAP_paramtest3d"
+embedding_path = "data/embeddings/285140.078369/test3d"
 os.makedirs(figpath, exist_ok=True)
 os.makedirs(embedding_path, exist_ok=True)
 
 saved_embeddings = os.listdir(embedding_path)
 
 #UMAP
-n_neighbors_range = [100, 150, 200, 250, 300]
+n_neighbors_range = [50, 400]
 min_dist_range = [0.05, 0.1]
 
 for n_neighbors in n_neighbors_range:
@@ -46,7 +47,9 @@ for n_neighbors in n_neighbors_range:
         print(n_neighbors, min_dist)
 
         if f"{n_neighbors}_{min_dist}.npy" in saved_embeddings:
-            embedding = np.load(f"{n_neighbors}_{min_dist}.npy")
+            embedding = np.load(
+                os.path.join(embedding_path, f"{n_neighbors}_{min_dist}.npy")
+                )
             print("loaded from existing")
 
         else:
@@ -60,7 +63,7 @@ for n_neighbors in n_neighbors_range:
                 #ensures reproducibility, disable for faster compute
                 # random_state=0,
                 #how many dimensions to reduce to
-                n_components=2
+                n_components=3,
             )
 
             np.save(
@@ -83,10 +86,11 @@ for n_neighbors in n_neighbors_range:
                 scale_points = True,
                 cmap_var=var,
                 cmap_minmax=cmap_minmax,
-                save=True,
+                #save=True,
                 title=f"{n_neighbors}_{min_dist}_{var}",
                 figname=f"{n_neighbors}_{min_dist}_{var}",
-                figpath=figpath
+                figpath=figpath,
+                view=(None, None)
             )
 
         print(f"time: {(time.time()-start_time):.2f} s")
