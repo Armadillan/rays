@@ -1,3 +1,7 @@
+"""
+This reproduces the error in the scaling function.
+"""
+
 import os
 import time
 
@@ -56,3 +60,5 @@ print((s2 - s1).describe())
 print("scaled data descriptions")
 print(pd.DataFrame(s1, columns=s2.columns).describe())
 print(s2.describe())
+
+print(repr(cleaned_data.head().values))
