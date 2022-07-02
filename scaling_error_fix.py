@@ -18,7 +18,7 @@ df1, _ = kf.import_vtk_data("data/postProcessing/plane/285140.078369/data.vtk")
 df = pd.read_csv(StringIO(df1.to_csv()), index_col=0)
 
 
-# The data is no longe equal
+# The data is no longer the same
 print((df == df1).values.all())
 
 single_scaler = StandardScaler()
@@ -36,3 +36,10 @@ for column in scaled_data_2.columns:
 
 #But the scaling is consistent (and good)
 print((scaled_data_1 == scaled_data_2).values.all())
+
+#the mean is good
+#it is actually better (closer to 0) than when the data is not saved to csv
+#and loaded back
+#probably to do with floating point weirdness?
+#this has to be a bug in sklearn...
+print(scaled_data_1.describe())
