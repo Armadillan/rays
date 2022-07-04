@@ -25,31 +25,41 @@ def get_data(path):
 
 df, mesh = get_data("285140.078369/data.vtk")
 
-cleaned_data = kf.clean_data(df, dim=2, vars_to_drop=["N2"])
-
 #The two methods give slightly different results, WHY?
 
 sc = StandardScaler()
-s1 = sc.fit_transform(cleaned_data)
+s1 = sc.fit_transform(df)
 
-s2 = cleaned_data.copy()
+s2 = df.copy()
+s2_mean_ = []
 s2_scale_ = []
 
-for label in cleaned_data.columns:
+for label in df.columns:
     scaler = StandardScaler()
-    scaler.fit(cleaned_data[label].values.reshape(-1, 1))
-    s2[label] = scaler.transform(cleaned_data[label].values.reshape(-1,1))
+    scaler.fit(df[label].values.reshape(-1, 1))
+    s2[label] = scaler.transform(df[label].values.reshape(-1,1))
+    s2_mean_.append(scaler.mean_)
     s2_scale_.append(scaler.scale_)
 
 
 #The scale factos are different
+#NOT AFTER REINSTALLING SKLEARN???
+#BUT THE RESULTS ARE STILL DIFFERENT?
 s2_scale_= np.array(s2_scale_).flatten()
-print("scale factors")
-print(sc.scale_)
-print(s2_scale_)
+# print("scale factors")
+# print(sc.scale_)
+# print(s2_scale_)
 
 print("scale factor diff")
 print(s2_scale_ - sc.scale_)
+
+s2_mean_= np.array(s2_mean_).flatten()
+# print("means")
+# print(sc.mean_)
+# print(s2_mean_)
+
+print("mean diff")
+print(s2_mean_ - sc.mean_)
 
 print("scaled data diff description")
 print((s2 - s1).describe())
