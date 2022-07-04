@@ -31,7 +31,9 @@ scaled_data_2_scale_ = []
 
 for column in scaled_data_2.columns:
     fresh_scaler = StandardScaler()
-    scaled_data_2[column] = fresh_scaler.fit_transform(df[column].values.reshape(-1, 1))
+    # scaled_data_2[column] = fresh_scaler.fit_transform(df[column].values.reshape(-1, 1))
+    fresh_scaler.fit(df[column].values.reshape(-1, 1))
+    scaled_data_2[column] = fresh_scaler.transform(df[column].values.reshape(-1, 1))
     scaled_data_2_scale_.append(fresh_scaler.scale_)
 
 #But the scaling is consistent (and good)
@@ -43,4 +45,4 @@ print((scaled_data_1-scaled_data_2).describe())
 #the mean is good
 #probably to do with floating point weirdness?
 #this has to be a bug in sklearn...
-print(scaled_data_1.describe())
+print(scaled_data_2.describe())

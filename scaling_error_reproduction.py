@@ -36,8 +36,9 @@ s2_scale_ = []
 
 for label in df.columns:
     scaler = StandardScaler()
-    scaler.fit(df[label].values.reshape(-1, 1))
-    s2[label] = scaler.transform(df[label].values.reshape(-1,1))
+    # scaler.fit(df[label].values.reshape(-1, 1))
+    # s2[label] = scaler.transform(df[label].values.reshape(-1,1))
+    s2[label] = scaler.fit_transform(df[label].values.reshape(-1,1))
     s2_mean_.append(scaler.mean_)
     s2_scale_.append(scaler.scale_)
 
