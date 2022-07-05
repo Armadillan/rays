@@ -37,9 +37,10 @@ for column in scaled_data_2.columns:
 #But the scaling is consistent (and good)
 print((scaled_data_1 == scaled_data_2).values.all())
 
+# The data frames are identical
+print((scaled_data_1-scaled_data_2).describe())
+
 #the mean is good
-#it is actually better (closer to 0) than when the data is not saved to csv
-#and loaded back
 #probably to do with floating point weirdness?
 #this has to be a bug in sklearn...
 print(scaled_data_1.describe())
