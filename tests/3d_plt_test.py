@@ -6,13 +6,13 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from vtk_tools import import_vtk_data
+from keyfi import import_vtk_data
 
 snapshot = 500.5
 
-file_dir = f"data/postProcessing/sphere/{snapshot}/U_zNormal.vtk"
+file_dir = f"data/sphere/{snapshot}/U_zNormal.vtk"
 
-df, mesh = import_vtk_data(file_dir, "U")
+df, mesh = import_vtk_data(file_dir)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
