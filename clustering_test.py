@@ -41,9 +41,9 @@ df, mesh = get_data(SNAPSHOT)
 
 clusterer = kf.cluster_embedding(
     embedding=embedding,
-    algorithm=KMeans,
-    # min_cluster_size=300,
-    # min_samples=10,
+    algorithm=HDBSCAN,
+    min_cluster_size=300,
+    min_samples=10,
 )
 
 import pickle
@@ -54,11 +54,11 @@ with open("clusterer.pickle", "wb") as file:
 with open("clusterer.pickle", "rb") as file:
     clusterer = pickle.load(file)
 
-kf.plot_cluster_membership(
-    embedding=embedding,
-    clusterer=clusterer,
-    soft=False
-)
+# kf.plot_cluster_membership(
+#     embedding=embedding,
+#     clusterer=clusterer,
+#     soft=False
+# )
 
 # what is this supposed to be?
 # kf.plot_clustering(embedding=embedding, cluster_labels=clusterer.labels_)
@@ -78,15 +78,15 @@ cluster_mi_scores = kf.get_cluster_mi_scores(
     embedding=embedding,
     cluster_num = 0,
     scale = False,
-    flag_print = False,
-    flag_plot = True
+    # flag_print = True,
+    # flag_plot = True
 )
 
 cluster_mi_scores.to_pickle("mo_scores.pickle")
 
 cluster_mi_scores = pd.read_pickle("mo_scores.pickle")
 
-kf.mi.plot_cluster_mi_scores(cluster_mi_scores)
+# kf.mi.plot_cluster_mi_scores(cluster_mi_scores)
 
 path_output = 'data/clusters_umap_hdbscan.vtk'
 kf.export_vtk_data(mesh=mesh, path=path_output, cluster_labels=clusterer.labels_)

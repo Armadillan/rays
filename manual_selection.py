@@ -68,5 +68,5 @@ for i in range(3):
         flag_plot = True
     )
 
-path_output = 'data/clusters_umap_hdbscan.vtk'
+path_output = 'data/manual_clusters.vtk'
 kf.export_vtk_data(mesh=mesh, path=path_output, cluster_labels=clusterer.labels_)
