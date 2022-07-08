@@ -54,11 +54,11 @@ with open("clusterer.pickle", "wb") as file:
 with open("clusterer.pickle", "rb") as file:
     clusterer = pickle.load(file)
 
-# kf.plot_cluster_membership(
-#     embedding=embedding,
-#     clusterer=clusterer,
-#     soft=False
-# )
+kf.plot_cluster_membership(
+    embedding=embedding,
+    clusterer=clusterer,
+    soft=False
+)
 
 # what is this supposed to be?
 # kf.plot_clustering(embedding=embedding, cluster_labels=clusterer.labels_)
