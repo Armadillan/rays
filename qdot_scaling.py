@@ -11,6 +11,10 @@ import keyfi as kf
 from keyfi.dimred import UMAP
 from keyfi.cluster import HDBSCAN
 
+from matplotlib import rcParams
+rcParams['mathtext.fontset'] = 'stix'
+rcParams['font.family'] = 'STIXGeneral'
+
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler
 
 DATA_PATH = "data/postProcessing/plane"
@@ -34,7 +38,7 @@ clipped200 = qdot.clip(-200, 200)
 
 clipped100 = qdot.clip(-100, 100)
 
-BINS = 200
+BINS = 100
 
 axes[0, 0].hist(
     MaxAbsScaler().fit_transform(clipped200.values.reshape(-1,1)),
@@ -60,4 +64,18 @@ axes[1, 1].hist(
 )
 axes[1, 1].set_title("100")
 
+plt.show()
+
+plt.hist(df["Qdot"], bins=100)
+plt.tight_layout()
+plt.xlabel("$\dot{Q}$")
+plt.ylabel("Frequency")
+plt.savefig("figures/final/Qdot_nonclipped.png", bbox_inches='tight')
+plt.show()
+
+plt.hist(df["Qdot"].clip(-300, 300), bins=100)
+plt.tight_layout()
+plt.xlabel("$\dot{Q}$")
+plt.ylabel("Frequency")
+plt.savefig("figures/final/Qdot_300clipped.png", bbox_inches='tight')
 plt.show()

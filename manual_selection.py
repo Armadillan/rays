@@ -12,7 +12,7 @@ from keyfi.cluster import HDBSCAN
 
 
 DATA_PATH = "data/postProcessing/plane"
-SNAPSHOT = "285140.078369"
+SNAPSHOT = "285044.078369"
 
 def get_data(snapshot):
     return kf.import_vtk_data(
@@ -20,11 +20,7 @@ def get_data(snapshot):
     )
 
 
-embedding_path = os.path.join(
-    "data/embeddings/final_umap_test",
-    SNAPSHOT,
-    "250_0.1_300c.npy"
-    )
+embedding_path = os.path.join("data/output/embeddings", SNAPSHOT + ".npy")
 
 embedding = np.load(embedding_path)
 
@@ -38,6 +34,8 @@ clusterer = kf.cluster_embedding(
     prediction_data=True,
 )
 
+# plt.scatter(*embedding.T, s=0.1)
+# plt.show()
 # kf.plot_embedding(
 #     embedding=embedding,
 #     data=df,
@@ -47,17 +45,24 @@ clusterer = kf.cluster_embedding(
 # )
 
 for index in range(49409):
-    if -9.4 <= embedding[index][0] <= 8:
-        if -7.7 <= embedding[index][1] <= 1.3:
-            clusterer.labels_[index] = 2
+    if 17.2 <= embedding[index][0]:
+        # if -7.7 <= embedding[index][1] <= 1.3:
+            clusterer.labels_[index] = 5
+    if (embedding[index][1] <= 8.2 and embedding[index][0] >= 3.9) or embedding[index][1] <= 1.5:
+        clusterer.labels_[index] = 6
+
+os.makedirs("figures/manual_clustering", exist_ok=True)
 
 kf.plot_cluster_membership(
     embedding=embedding,
     clusterer=clusterer,
-    soft=False
+    soft=False,
+    save=True,
+    figpath="figures/manual_clustering",
+    figname=SNAPSHOT+".png"
 )
 
-for i in range(3):
+for i in [0, 5, 6]:
     kf.get_cluster_mi_scores(
         data=df,
         clusterer=clusterer,
@@ -65,8 +70,8 @@ for i in range(3):
         cluster_num = i,
         scale = False,
         flag_print = False,
-        flag_plot = True
+        flag_plot = False
     )
 
-path_output = 'data/manual_clusters.vtk'
+path_output = 'data/manual_clusters/' + SNAPSHOT + '.vtk'
 kf.export_vtk_data(mesh=mesh, path=path_output, cluster_labels=clusterer.labels_)
