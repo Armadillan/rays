@@ -12,11 +12,13 @@ import keyfi as kf
 from keyfi.dimred import UMAP
 from keyfi.cluster import HDBSCAN
 
-DATA_PATH = "./data/input"
-EMBEDDINGS_PATH ="./data/output/embeddings"
-CLUSTERERS_PATH = "./data/clusterers"
-MI_SCORES_PATH = "./data/mi_scores"
-logfile = "./data/log.txt"
+from sklearn.preprocessing import MaxAbsScaler
+
+DATA_PATH = "data/postProcessing/plane"
+EMBEDDINGS_PATH ="data/output/embeddings"
+CLUSTERERS_PATH = "data/clusterers"
+MI_SCORES_PATH = "data/mi_scores"
+logfile = "data/log.txt"
 
 os.makedirs(EMBEDDINGS_PATH, exist_ok=True)
 os.makedirs(CLUSTERERS_PATH, exist_ok=True)
@@ -33,24 +35,32 @@ def log(*msg):
     with open(logfile, "a") as file:
         print(*msg, file=file)
 
-features_to_scale = ['T', 'Qdot', ['U:0', 'U:1']]
-scalers = [MaxAbsScaler] * 3
+features_to_scale = ['T', 'Qdot', "N2O4", ['U:0', 'U:1']]
+scalers = [MaxAbsScaler] * 4
 
-for index, snapshot in enumerate(os.listdir(DATA_PATH)):
+#
+to_compute = ['285473.078369', '286074.578369', '285425.078369', '285470.078369', '286149.578369', '286118.078369', '285563.078369', '286185.578369', '285483.578369', '285240.578369', '285602.078369', '285083.078369', '285567.578369', '286008.578369', '285911.078369', '286086.578369', '285144.578369', '285116.078369', '285479.078369', '285146.078369', '285047.078369', '285750.578369', '285647.078369', '285213.578369']
+num_to_compute = len(to_compute)
+
+
+for index, snapshot in enumerate(to_compute):
 
     start_time = time.time()
     #data prep
     df, mesh = get_data(snapshot)
 
+    print(df.describe())
+    exit()
+
     data = kf.clean_data(df, dim=2,
                                 vars_to_drop=["N2", "NO2", "rho"]
                             )
-    data["Qdot"].clip(-qdot_clip, qdot_clip)
+    data["Qdot"].clip(-300, 300, inplace=True)
 
     data = kf.scale_data(data, features_to_scale, scalers)
 
-    log(f"{index+1}/866: {snapshot}")
-    print(f"{index+1}/866: {snapshot}")
+    log(f"{index+1}/{num_to_compute}: {snapshot}")
+    print(f"{index+1}/{num_to_compute}: {snapshot}")
 
     if f"{snapshot}.npy" in saved_embeddings:
         embedding = np.load(
@@ -63,10 +73,10 @@ for index, snapshot in enumerate(os.listdir(DATA_PATH)):
         embedding, mapper = kf.embed_data(
             data=data,
             algorithm=UMAP,
-            n_neighbors=n_neighbors,
-            min_dist=min_dist,
+            n_neighbors=250,
+            min_dist=0.1,
             #reproducible
-            #random_state=0,
+            random_state=0,
             n_components=2,
         )
 
@@ -74,13 +84,13 @@ for index, snapshot in enumerate(os.listdir(DATA_PATH)):
             os.path.join(EMBEDDINGS_PATH, f"{snapshot}"),
             embedding
         )
-    print(f"{(index+1)/8.66:.3f}%")
+    print(f"{(index+1)*100/num_to_compute:.3f}%")
     print(f"time: {time.time()-start_time}")
-    log(f"{(index+1)/8.66:.3f}%")
+    log(f"{(index+1)*100/num_to_compute:.3f}%")
     log(f"time: {time.time()-start_time}")
 
-#HDBSCAN
-for index, snapshot_embedding in enumerate(os.listdir(EMBEDDINGS_PATH)):
+# #HDBSCAN
+for index, snapshot_embedding in enumerate(sorted(os.listdir(EMBEDDINGS_PATH))):
     snapshot = snapshot_embedding[:-4]
 
     embedding = np.load(os.path.join(EMBEDDINGS_PATH, snapshot_embedding))
@@ -95,15 +105,14 @@ for index, snapshot_embedding in enumerate(os.listdir(EMBEDDINGS_PATH)):
     with open(os.path.join(CLUSTERERS_PATH, snapshot + ".pickle"), "wb") as file:
         pickle.dump(clusterer, file)
 
-    print(f"{(index + 1) / 8.66:.2f}")
+    print(f"{(index + 1) * 100 /  866:.2f}%")
 
-#MI
 for index, clusterer_filename in enumerate(os.listdir(CLUSTERERS_PATH)):
 
     start_time = time.time()
 
     snapshot = clusterer_filename[:-7]
-    print(f"{index+1}/866: {snapshot}")
+    print(f"{index+1}/{num_to_compute}: {snapshot}")
 
     snapshot_mi_scores = {}
 
@@ -130,5 +139,5 @@ for index, clusterer_filename in enumerate(os.listdir(CLUSTERERS_PATH)):
     with open(os.path.join(MI_SCORES_PATH, snapshot + ".pickle"), "wb") as file:
         pickle.dump(snapshot_mi_scores, file)
 
-    print(f"{(index+1)/8.66:.3f}%")
+    print(f"{(index+1)*100/num_to_compute:.3f}%")
     print(f"time: {time.time()-start_time}")

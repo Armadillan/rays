@@ -12,7 +12,8 @@ from keyfi.cluster import HDBSCAN
 
 
 DATA_PATH = "data/postProcessing/plane"
-SNAPSHOT = "285044.078369"
+# SNAPSHOT = "285044.078369" #8
+SNAPSHOT = "285140.078369" #72
 
 def get_data(snapshot):
     return kf.import_vtk_data(
@@ -44,12 +45,26 @@ clusterer = kf.cluster_embedding(
 #     cmap_minmax=[],
 # )
 
+# kf.show_condensed_tree(clusterer, select_clusters=True, label_clusters=False)
+
 for index in range(49409):
-    if 17.2 <= embedding[index][0]:
-        # if -7.7 <= embedding[index][1] <= 1.3:
-            clusterer.labels_[index] = 5
-    if (embedding[index][1] <= 8.2 and embedding[index][0] >= 3.9) or embedding[index][1] <= 1.5:
-        clusterer.labels_[index] = 6
+
+    # #8
+    # if 17.2 <= embedding[index][0]:
+    #     # if -7.7 <= embedding[index][1] <= 1.3:
+    #         clusterer.labels_[index] = 5
+    # if (embedding[index][1] <= 8.2 and embedding[index][0] >= 3.9) or embedding[index][1] <= 1.5:
+    #     clusterer.labels_[index] = 6
+
+
+    # #72
+    if -9.4 <= embedding[index][0] <= 8:
+        if -7 <= embedding[index][1] <= -0.5:
+            clusterer.labels_[index] = 2
+    if -8.9 <= embedding[index][0] <= -7.5:
+        clusterer.labels_[index] = 2
+    if 13.9 <= embedding[index][0]:
+        clusterer.labels_[index] = 3
 
 os.makedirs("figures/manual_clustering", exist_ok=True)
 
@@ -61,8 +76,8 @@ kf.plot_cluster_membership(
     figpath="figures/manual_clustering",
     figname=SNAPSHOT+".png"
 )
-
-for i in [0, 5, 6]:
+for i in np.unique(clusterer.labels_):
+    print(i)
     kf.get_cluster_mi_scores(
         data=df,
         clusterer=clusterer,
@@ -70,8 +85,8 @@ for i in [0, 5, 6]:
         cluster_num = i,
         scale = False,
         flag_print = False,
-        flag_plot = False
+        flag_plot = True,
     )
 
-path_output = 'data/manual_clusters/' + SNAPSHOT + '.vtk'
-kf.export_vtk_data(mesh=mesh, path=path_output, cluster_labels=clusterer.labels_)
+# path_output = 'data/manual_clusters/' + SNAPSHOT + '.vtk'
+# kf.export_vtk_data(mesh=mesh, path=path_output, cluster_labels=clusterer.labels_)
